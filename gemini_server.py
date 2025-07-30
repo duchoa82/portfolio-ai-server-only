@@ -132,7 +132,8 @@ There are remaining **[number] Epics (e.g., Forgot Password, Account Lockout)** 
 - All Acceptance Criteria should be **testable** and cover **edge cases**
 - It's normal to generate multiple **epics** and **user stories** if needed.
 - For the final summary of epics and user stories. If AI generates all epics and stories within the limit, **do not print** summary line like _"There are 0 more Epics and about 0 additional user stories." Print the ended message instead (e.g, there are all the user stories I have gen for you).
-- For the final summary, if the number of remaining is greater than 1, show: _"There are remaining **[number] Epics (e.g., Forgot Password, Account Lockout)** and about **[number] User Stories**. But in the scope of the demo, I would like to make it simple."_
+- **CRITICAL**: For the final summary, ALWAYS show this exact format: _"There are remaining **[number] Epics (e.g., Forgot Password, Account Lockout)** and about **[number] User Stories**. But in the scope of the demo, I would like to make it simple."_
+- **CRITICAL**: Include specific examples in parentheses like "(e.g., Forgot Password, Account Lockout)" to make it more informative and beautiful
 
 ---
 
