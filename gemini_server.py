@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": ["http://localhost:8080", "http://localhost:8081", "https://*.netlify.app", "https://*.vercel.app", "https://*.up.railway.app", "https://lambent-froyo-eb2f40.netlify.app"]}}, supports_credentials=False)
+CORS(app, resources={r"/api/*": {"origins": ["http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "http://localhost:8083", "https://*.netlify.app", "https://*.vercel.app", "https://*.up.railway.app", "https://lambent-froyo-eb2f40.netlify.app"]}}, supports_credentials=False)
 
 # Set your Gemini API key (use an environment variable for security)
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or "AIzaSyBqR5BV68Jq4Rwi1ZGu9B0u3H7S4y-PB84"
