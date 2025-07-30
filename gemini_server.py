@@ -2,6 +2,7 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import google.generativeai as genai
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": ["http://localhost:8080", "http://localhost:8081", "https://*.netlify.app", "https://*.vercel.app"]}}, supports_credentials=True)
@@ -12,7 +13,16 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 @app.route('/', methods=['GET'])
 def health_check():
-    return jsonify({"status": "healthy", "message": "AI Server is running"})
+    return jsonify({
+        "status": "healthy", 
+        "message": "AI Server is running",
+        "timestamp": str(datetime.now()),
+        "port": os.environ.get("PORT", "unknown")
+    })
+
+@app.route('/test', methods=['GET'])
+def test():
+    return jsonify({"message": "Test endpoint working"})
 
 @app.route('/api/user-story', methods=['POST'])
 def user_story():
