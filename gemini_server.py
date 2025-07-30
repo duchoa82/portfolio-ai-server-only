@@ -1,0 +1,115 @@
+import os
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import google.generativeai as genai
+
+app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": ["http://localhost:8080", "http://localhost:8081", "https://*.netlify.app", "https://*.vercel.app"]}}, supports_credentials=True)
+
+# Set your Gemini API key (use an environment variable for security)
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or "AIzaSyBqR5BV68Jq4Rwi1ZGu9B0u3H7S4y-PB84"
+genai.configure(api_key=GEMINI_API_KEY)
+
+@app.route('/api/user-story', methods=['POST'])
+def user_story():
+    data = request.get_json()
+    feature = data.get('feature', '')
+    prompt = f"""
+---
+
+### Prompt for Writing User Stories in Markdown Format
+
+---
+
+### Role Definition
+You are a **Product Owner and Agile Business Analyst** with a strong understanding of software delivery and stakeholder collaboration. Your role is to write clear, actionable user stories based on input ideas or messages, following Agile best practices. Your output must help the whole team (tech + non-tech) understand what to build and why.
+
+---
+
+### Workflow Steps
+
+#### Step 1: Analyze the Input Message
+- Understand the core intent behind the feature or idea in `{feature}`
+- Identify who the primary user is (e.g., merchant, customer, admin, editor)
+- Determine the main value this feature brings to that user
+
+#### Step 2: Define Edge Cases
+- List all possible edge cases related to the flow
+- Group them into success, failure, and conditional scenarios
+- Create Acceptance Criteria per edge case (not just per story)
+
+#### Step 3: Generate Output
+- Create 1 or more **Epics** based on function names (e.g. Login, Sign Up, Forgot Password)
+- Write **User Stories** using the format:
+
+  > As a [role], I want to [action], so that [benefit]
+
+- For each Epic:
+  - Print a maximum 2 user stories for Epic 1
+  - For each story, write 2–4 **Acceptance Criteria** using `Given / When / Then` format as full sentences
+  - Use this heading format: `## Epic 1: [Function Name]`
+  - Summarize the rest in this format: _"There are [x] more Epics and about [y] additional user stories."_
+  - If no more epics or stories, omit the summary line
+
+#### Step 4: Write in Simple Business Language
+- Avoid technical jargon unless universally understood
+- Make it understandable for both technical and non-technical roles
+
+---
+
+### Output Format (in Markdown)
+
+**IMPORTANT: Your response MUST start with this exact line:**
+"This result is generated with AI based on system thinking and user story training by Hoà Trương."
+
+#### Epic Format
+```markdown
+## Epic 1: [Function Name]
+```
+
+#### User Story Format
+```markdown
+**User Story 1:** As a [role], I want to [do something], so that [desired benefit]
+```
+
+#### Acceptance Criteria Format
+```markdown
+### Acceptance Criteria:
+**A/C 1:** Given [context], when [event occurs], then [expected outcome].
+**A/C 2:** Given [another context], when [event occurs], then [expected outcome].
+**A/C 3:** Given [edge case context], when [event occurs], then [expected outcome].
+**A/C 4:** Given [optional scenario], when [event occurs], then [expected outcome].
+```
+
+There are remaining **[number of Epic] Epic** and **[number of user stories] User Stories**. But in the scope of the demo, I would like to make it simple.
+
+---
+
+### Notes
+- Use **bold markdown** for A/C numbering and inline `Given / When / Then` structure
+- Replace `[role]` with real-world user types (e.g. merchant, buyer, admin)
+- All Acceptance Criteria should be **testable** and cover **edge cases**
+- It's normal to generate multiple **epics** and **user stories** if needed.
+- **CRITICAL RULE**: For the final summary of epics and user stories:
+  - If AI generates all epics and stories within the limit (0 remaining), **DO NOT PRINT** the summary line like _"There are 0 more Epics and about 0 additional user stories."_
+  - Instead, print this exact message: **"There are all the user stories I have gen for you."**
+  - If the number of remaining is greater than 1, then show: _"There are [x] more Epics and about [y] additional user stories."_
+
+**FINAL OUTPUT MUST END WITH**: "There are all the user stories I have gen for you." (when 0 remaining)
+
+---
+"""
+    try:
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        generation_config = {
+            "temperature": 1.0,
+            "top_p": 0.95,
+        }
+        response = model.generate_content(prompt, generation_config=generation_config)
+        result = response.text
+        return jsonify({'userStory': result})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(port=3001, debug=True) 
