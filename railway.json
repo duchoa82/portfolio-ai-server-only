@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "gunicorn gemini_server:app --bind 0.0.0.0:$PORT --timeout 120 --workers 1 --preload",
+    "startCommand": "python3 gemini_server.py",
     "healthcheckPath": "/",
     "healthcheckTimeout": 600,
     "restartPolicyType": "ON_FAILURE",

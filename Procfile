@@ -1,0 +1,1 @@
+web: python3 gemini_server.py 
