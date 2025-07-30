@@ -10,6 +10,10 @@ CORS(app, resources={r"/api/*": {"origins": ["http://localhost:8080", "http://lo
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or "AIzaSyBqR5BV68Jq4Rwi1ZGu9B0u3H7S4y-PB84"
 genai.configure(api_key=GEMINI_API_KEY)
 
+@app.route('/', methods=['GET'])
+def health_check():
+    return jsonify({"status": "healthy", "message": "AI Server is running"})
+
 @app.route('/api/user-story', methods=['POST'])
 def user_story():
     data = request.get_json()
