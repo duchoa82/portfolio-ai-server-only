@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=False)
+CORS(app, resources={r"/api/*": {"origins": ["http://localhost:8080", "http://localhost:8081", "https://*.netlify.app", "https://*.vercel.app", "https://*.up.railway.app", "https://lambent-froyo-eb2f40.netlify.app"]}}, supports_credentials=False)
 
 # Set your Gemini API key (use an environment variable for security)
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or "AIzaSyBqR5BV68Jq4Rwi1ZGu9B0u3H7S4y-PB84"
@@ -122,7 +122,7 @@ This result is generated with AI based on system thinking and user story trainin
 **A/C 4:** Given [optional scenario], when [event occurs], then [expected outcome].
 ```
 
-There are remaining **[number of Epic] Epic** and **[number of user stories] User Storie**. But in the scope of the demo, I would like to make it simple
+There are remaining **[number] Epics (e.g., Forgot Password, Account Lockout)** and about **[number] User Stories**. But in the scope of the demo, I would like to make it simple.
 
 ---
 
@@ -132,7 +132,7 @@ There are remaining **[number of Epic] Epic** and **[number of user stories] Use
 - All Acceptance Criteria should be **testable** and cover **edge cases**
 - It's normal to generate multiple **epics** and **user stories** if needed.
 - For the final summary of epics and user stories. If AI generates all epics and stories within the limit, **do not print** summary line like _"There are 0 more Epics and about 0 additional user stories." Print the ended message instead (e.g, there are all the user stories I have gen for you).
-- For the final summary, if the number of remaining is greater than 1, show the Epics, User Stories
+- For the final summary, if the number of remaining is greater than 1, show: _"There are remaining **[number] Epics (e.g., Forgot Password, Account Lockout)** and about **[number] User Stories**. But in the scope of the demo, I would like to make it simple."_
 
 ---
 
