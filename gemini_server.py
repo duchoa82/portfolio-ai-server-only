@@ -3,6 +3,11 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import google.generativeai as genai
 from datetime import datetime
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": ["http://localhost:8080", "http://localhost:8081", "https://*.netlify.app", "https://*.vercel.app"]}}, supports_credentials=True)
@@ -13,16 +18,27 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 @app.route('/', methods=['GET'])
 def health_check():
-    return jsonify({
-        "status": "healthy", 
-        "message": "AI Server is running",
-        "timestamp": str(datetime.now()),
-        "port": os.environ.get("PORT", "unknown")
-    })
+    try:
+        logger.info("Health check endpoint called")
+        return jsonify({
+            "status": "healthy", 
+            "message": "AI Server is running",
+            "timestamp": str(datetime.now()),
+            "port": os.environ.get("PORT", "unknown"),
+            "environment": os.environ.get("RAILWAY_ENVIRONMENT", "unknown")
+        })
+    except Exception as e:
+        logger.error(f"Health check error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/test', methods=['GET'])
 def test():
-    return jsonify({"message": "Test endpoint working"})
+    try:
+        logger.info("Test endpoint called")
+        return jsonify({"message": "Test endpoint working"})
+    except Exception as e:
+        logger.error(f"Test endpoint error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/user-story', methods=['POST'])
 def user_story():
@@ -126,5 +142,12 @@ There are remaining **[number of Epic] Epic** and **[number of user stories] Use
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 3001))
-    app.run(host='0.0.0.0', port=port, debug=False) 
+    try:
+        port = int(os.environ.get('PORT', 3001))
+        logger.info(f"Starting Flask app on port {port}")
+        logger.info(f"Environment: {os.environ.get('RAILWAY_ENVIRONMENT', 'local')}")
+        logger.info(f"GEMINI_API_KEY set: {'Yes' if os.environ.get('GEMINI_API_KEY') else 'No'}")
+        app.run(host='0.0.0.0', port=port, debug=False)
+    except Exception as e:
+        logger.error(f"Failed to start Flask app: {e}")
+        raise e 
