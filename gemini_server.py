@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": ["http://localhost:8080", "http://localhost:8081", "https://*.netlify.app", "https://*.vercel.app"]}}, supports_credentials=True)
+CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=False)
 
 # Set your Gemini API key (use an environment variable for security)
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or "AIzaSyBqR5BV68Jq4Rwi1ZGu9B0u3H7S4y-PB84"
@@ -42,9 +42,21 @@ def test():
 
 @app.route('/api/user-story', methods=['POST'])
 def user_story():
-    data = request.get_json()
-    feature = data.get('feature', '')
-    prompt = f"""
+    try:
+        logger.info("User story endpoint called")
+        data = request.get_json()
+        if not data:
+            logger.error("No JSON data received")
+            return jsonify({'error': 'No JSON data received'}), 400
+            
+        feature = data.get('feature', '')
+        if not feature:
+            logger.error("No feature provided in request")
+            return jsonify({'error': 'No feature provided'}), 400
+            
+        logger.info(f"Received user story request for feature: {feature}")
+        
+        prompt = f"""
 ---
 
 ### Prompt for Writing User Stories in Markdown Format
@@ -129,7 +141,6 @@ There are remaining **[number of Epic] Epic** and **[number of user stories] Use
 
 ---
 """
-    try:
         model = genai.GenerativeModel('gemini-1.5-flash')
         generation_config = {
             "temperature": 1.0,
@@ -137,8 +148,10 @@ There are remaining **[number of Epic] Epic** and **[number of user stories] Use
         }
         response = model.generate_content(prompt, generation_config=generation_config)
         result = response.text
+        logger.info(f"Successfully generated user story for feature: {feature}")
         return jsonify({'userStory': result})
     except Exception as e:
+        logger.error(f"Error in user story endpoint: {e}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
